@@ -1,0 +1,127 @@
+[
+  {
+    "path": ".env.example",
+    "bytes": 730,
+    "sha256": "f86e5c0f9446b1a817cc608f0f98b06a696ee1e05d10f4e5e63a0ec87d12d010"
+  },
+  {
+    "path": "AGENTS.md",
+    "bytes": 2515,
+    "sha256": "27590f407e296781e1fef723588874d16b9edc5ec9a8df271b0d96cd5f714563"
+  },
+  {
+    "path": "CODEX_MASTER_PROMPT.md",
+    "bytes": 2474,
+    "sha256": "823f81344f04f2ce2564b57fef4be042a8144a331ef7a98298b450d24d2c2041"
+  },
+  {
+    "path": "HANDOFF_INSTRUCTIONS.md",
+    "bytes": 1487,
+    "sha256": "eeae715d3ab7a37c98d27ac0406a1cdd2e6b08f22492555219520d8cf35192f7"
+  },
+  {
+    "path": "README.md",
+    "bytes": 3174,
+    "sha256": "f1d3055b957d9b2c5954fb3977c8101fab60f1ac41967b4e6b13436bece7c8c5"
+  },
+  {
+    "path": "db/schema.sql",
+    "bytes": 14463,
+    "sha256": "a7cab154d1b7567022e4189c5d86912463fc1ea3c9e79b9a5158c96f073bfb51"
+  },
+  {
+    "path": "docs/ACCEPTANCE_TESTS.md",
+    "bytes": 2676,
+    "sha256": "2e5ff073b59da9a55aaf585ed7d9931f18914df1eda7c4fe8a5347abcd4e9f2b"
+  },
+  {
+    "path": "docs/ADR-0001.md",
+    "bytes": 381,
+    "sha256": "4626d812dc15c616c2480052417609435f41a4410e870b5a0fed3bb3c48277c1"
+  },
+  {
+    "path": "docs/ADR-0002.md",
+    "bytes": 380,
+    "sha256": "dd14dc8200c944f269596c4c4f04370660a97612b98464280942a47909a7c5e6"
+  },
+  {
+    "path": "docs/ADR-0003.md",
+    "bytes": 282,
+    "sha256": "4d7dd8ee0ef4699ae41fe6110e3f4d133446123086c2d576408dbd82313a2078"
+  },
+  {
+    "path": "docs/AI_PIPELINE.md",
+    "bytes": 4153,
+    "sha256": "fcdd00ab56aaa52d0595758dfd856fae3a5ffb8f554e435ebbcef591043acbd9"
+  },
+  {
+    "path": "docs/API_SPEC.md",
+    "bytes": 2468,
+    "sha256": "074903de3a930ae628ed266305b7a21971a1e71806d2c2587defee47070fd9c4"
+  },
+  {
+    "path": "docs/ARCHITECTURE.md",
+    "bytes": 3745,
+    "sha256": "61611c023acc71a6a1e5f6a8a06b5aa273fa9501f6c3e494c1fa299429f6811a"
+  },
+  {
+    "path": "docs/BACKLOG.md",
+    "bytes": 2143,
+    "sha256": "65dee52f0dc9b8d1d1a3929f3c90d5d70db051bfe3a8a5838be1f6d2e19e636b"
+  },
+  {
+    "path": "docs/BUILD_PLAN.md",
+    "bytes": 3453,
+    "sha256": "afbb58bbb2540bf917039b69237d744bda24b7d8c9959120c45dab50b8161289"
+  },
+  {
+    "path": "docs/DATA_MODEL.md",
+    "bytes": 2066,
+    "sha256": "e3849ca7388d30ba64386abed419f17add5a0c52bc9566cfd881bcd295273405"
+  },
+  {
+    "path": "docs/PRD.md",
+    "bytes": 7107,
+    "sha256": "82c9ae27b4c36aea273e1cb86df89f43f711446ab04bffdde31d5bc15c6bd923"
+  },
+  {
+    "path": "docs/SCORING_FORMULA.md",
+    "bytes": 593,
+    "sha256": "f159a4a46acb07005f664eca34fac584ca44cbca72a4eea080ba8773dc24203f"
+  },
+  {
+    "path": "docs/SECURITY.md",
+    "bytes": 2458,
+    "sha256": "85c8f3592f0e0d0e6867ec3c97825c6778cef01f29dc9ca25302f80089ec0f89"
+  },
+  {
+    "path": "docs/UX_SPEC.md",
+    "bytes": 2688,
+    "sha256": "1469673e1227f77abdc4eb9993607a974dfee52668d859b7682019ce923e46e8"
+  },
+  {
+    "path": "schemas/concept_package.schema.json",
+    "bytes": 2844,
+    "sha256": "9a5d575d7589f55f50ab94c52f377d852f056844dedbf40f9aa622b62046320b"
+  },
+  {
+    "path": "schemas/creative_dna.schema.json",
+    "bytes": 9229,
+    "sha256": "97e4178f684b22c26f98212ebfa6b495a92fa7fb0bdc1096f0530b6db78a5daf"
+  },
+  {
+    "path": "schemas/originality_evaluation.schema.json",
+    "bytes": 1341,
+    "sha256": "3ad015f52873ddaf57ea17a4b979614c5ad05992724e6980f35a872b8b089f56"
+  },
+  {
+    "path": "schemas/signal_score.schema.json",
+    "bytes": 2269,
+    "sha256": "2f9545de932ddb0f07c804ed69a38d5a318d470a37a3e3237e28d86b63a8ef25"
+  },
+  {
+    "path": "schemas/skeleton.schema.json",
+    "bytes": 1861,
+    "sha256": "ca346c94cdf7e64c79ee358c0ea3048d9bf6e37fcb99258a1708e73b1a14fb27"
+  }
+]
