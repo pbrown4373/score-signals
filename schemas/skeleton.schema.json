@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Skeleton",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "name",
+    "one_sentence_structure",
+    "beats",
+    "persuasion_mechanisms",
+    "transfer_rules",
+    "avoid_copying",
+    "canonical_text"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 120
+    },
+    "one_sentence_structure": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 500
+    },
+    "beats": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "order",
+          "role",
+          "function",
+          "constraints"
+        ],
+        "properties": {
+          "order": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "role": {
+            "type": "string"
+          },
+          "function": {
+            "type": "string"
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8
+          }
+        }
+      }
+    },
+    "persuasion_mechanisms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "maxItems": 12
+    },
+    "transfer_rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "maxItems": 15
+    },
+    "avoid_copying": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "maxItems": 20
+    },
+    "canonical_text": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 5000
+    }
+  }
+}

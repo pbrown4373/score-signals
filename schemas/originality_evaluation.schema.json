@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OriginalityEvaluation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "passed",
+    "phrase_overlap",
+    "ngram_overlap",
+    "semantic_similarity",
+    "flags",
+    "rationale"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "passed": {
+      "type": "boolean"
+    },
+    "phrase_overlap": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "ngram_overlap": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "semantic_similarity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "severity",
+          "detail"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "rationale": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20
+    }
+  }
+}

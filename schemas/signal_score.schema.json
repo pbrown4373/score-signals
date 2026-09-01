@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SignalScore",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "components",
+    "saturation_penalty",
+    "arbitrage_bonus",
+    "final_score",
+    "action_label",
+    "lifecycle",
+    "evidence_class"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "components": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "velocity",
+        "acceleration",
+        "diffusion",
+        "novelty",
+        "structural_reusability",
+        "brand_proximity",
+        "evidence_confidence"
+      ],
+      "properties": {
+        "velocity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "acceleration": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "diffusion": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "novelty": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "structural_reusability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "brand_proximity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "evidence_confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "saturation_penalty": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 20
+    },
+    "arbitrage_bonus": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "final_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "action_label": {
+      "enum": [
+        "IGNORE",
+        "WATCH",
+        "TEST",
+        "PRIORITY",
+        "BREAKOUT"
+      ]
+    },
+    "lifecycle": {
+      "enum": [
+        "EMERGING",
+        "ACCELERATING",
+        "MAINSTREAM",
+        "SATURATED",
+        "DECLINING"
+      ]
+    },
+    "evidence_class": {
+      "enum": [
+        "OBSERVED",
+        "INFERRED",
+        "CUSTOMER_VALIDATED",
+        "SCORE_VALIDATED"
+      ]
+    }
+  }
+}
