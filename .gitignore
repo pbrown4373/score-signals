@@ -1,0 +1,28 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next
+/out
+
+# tests
+/playwright-report
+/test-results
+/coverage
+
+# local environment
+.env
+.env.local
+.env.*.local
+
+# logs and OS files
+*.log
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Supabase local state
+/supabase/.branches
+/supabase/.temp

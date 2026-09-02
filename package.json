@@ -1,0 +1,52 @@
+{
+  "name": "score-signals",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint .",
+    "format": "prettier --write src tests scripts package.json package-lock.json tsconfig.json *.config.* eslint.config.mjs .github/workflows/ci.yml docs/IMPLEMENTATION_PLAN.md docs/ADR-0004.md docs/ADR-0005.md docs/progress/*.md",
+    "format:check": "prettier --check src tests scripts package.json package-lock.json tsconfig.json *.config.* eslint.config.mjs .github/workflows/ci.yml docs/IMPLEMENTATION_PLAN.md docs/ADR-0004.md docs/ADR-0005.md docs/progress/*.md",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset --local",
+    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
+    "test:db": "supabase start && supabase db reset --local && node scripts/run-db-tests.mjs",
+    "test:e2e": "playwright test",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run test:db && npm run build && npm run test:e2e"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.5",
+    "@supabase/supabase-js": "^2.112.4",
+    "next": "16.3.4",
+    "pino": "10.3.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.3.4",
+    "prettier": "3.9.6",
+    "prettier-plugin-tailwindcss": "0.8.1",
+    "supabase": "^2.116.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  }
+}

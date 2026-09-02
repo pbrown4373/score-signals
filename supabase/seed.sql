@@ -1,0 +1,1 @@
+-- Keep local seed data empty. Tests create deterministic data inside transactions.
