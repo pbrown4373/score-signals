@@ -16,13 +16,13 @@ export async function processMediaJob(
     repository?: MediaWorkerRepository;
     storage?: StorageAdapter;
   } = {},
-): Promise<void> {
+): Promise<string | null> {
   const environment = getServerEnvironment();
   const repository =
     dependencies.repository ?? new MediaWorkerRepository(createServiceClient());
   const storage = dependencies.storage ?? createStorageAdapter();
   const claim = await repository.claim(jobId);
-  if (!claim) return;
+  if (!claim) return null;
 
   const workDirectory = await mkdtemp(join(tmpdir(), "score-media-"));
   try {
@@ -55,7 +55,7 @@ export async function processMediaJob(
       });
     }
 
-    await repository.finish(
+    return await repository.finish(
       jobId,
       {
         duration_ms: processed.metadata.durationMs,
@@ -76,6 +76,7 @@ export async function processMediaJob(
             { cause },
           );
     await repository.fail(jobId, error);
+    return null;
   } finally {
     await rm(workDirectory, { recursive: true, force: true });
   }

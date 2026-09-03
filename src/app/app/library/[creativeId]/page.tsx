@@ -2,7 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { MediaRetryButton } from "@/components/media-retry-button";
+import { CreativeDNAResult } from "@/components/creative-dna-result";
 import { createClient } from "@/lib/supabase/server";
+import { AnalysisRepository } from "@/modules/analysis/repository";
+import { parseCreativeDNA } from "@/modules/analysis/validation";
 import { MediaRepository } from "@/modules/media/repository";
 import { requireTenantContext } from "@/modules/tenancy/context";
 
@@ -13,10 +16,11 @@ export default async function CreativePage({
 }) {
   const { creativeId } = await params;
   const context = await requireTenantContext();
-  const creative = await new MediaRepository(
-    await createClient(),
-    context.tenant.id,
-  ).getCreative(creativeId);
+  const supabase = await createClient();
+  const [creative, analysis] = await Promise.all([
+    new MediaRepository(supabase, context.tenant.id).getCreative(creativeId),
+    new AnalysisRepository(supabase, context.tenant.id).getResult(creativeId),
+  ]);
   if (!creative) notFound();
 
   return (
@@ -95,6 +99,24 @@ export default async function CreativePage({
           ))}
         </ul>
       </section>
+      {analysis ? (
+        <CreativeDNAResult
+          dna={parseCreativeDNA(analysis.deconstruction.payload)}
+          run={analysis.generationRun}
+          summary={analysis.deconstruction.summary}
+        />
+      ) : creative.asset.status === "TRANSCRIBING" ||
+        creative.asset.status === "ANALYZING" ? (
+        <section
+          className="mt-8 rounded-2xl border border-[var(--line)] bg-white p-6"
+          aria-live="polite"
+        >
+          <h2 className="text-xl font-semibold">Analysis in progress</h2>
+          <p className="mt-2 text-[var(--muted)]">
+            Current stage: {creative.asset.status.toLowerCase()}.
+          </p>
+        </section>
+      ) : null}
     </main>
   );
 }

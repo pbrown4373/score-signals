@@ -89,7 +89,7 @@ test("valid media processes while invalid and oversized input are rejected", asy
   await expect(
     page.getByRole("heading", { name: "Synthetic launch creative" }),
   ).toBeVisible();
-  await expect(page.getByText("TRANSCRIBING", { exact: true })).toBeVisible();
+  await expect(page.getByText("READY", { exact: true })).toBeVisible();
   await expect(
     page.getByText("NORMALIZED VIDEO", { exact: true }),
   ).toBeVisible();
@@ -97,6 +97,14 @@ test("valid media processes while invalid and oversized input are rejected", asy
   await expect(page.getByText("THUMBNAIL", { exact: true })).toBeVisible();
   await expect(page.getByText("FRAME", { exact: true })).toHaveCount(3);
   await expect(page.getByText("160 × 90", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Creative DNA" }),
+  ).toBeVisible();
+  await expect(page.getByText("OBSERVED", { exact: true })).toBeVisible();
+  await expect(page.getByText("INFERRED", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("No performance metrics were supplied.", { exact: true }),
+  ).toBeVisible();
 
   const statusResponse = await page.request.get(
     page.url().replace("/app/library/", "/api/creative/"),
@@ -104,8 +112,26 @@ test("valid media processes while invalid and oversized input are rejected", asy
   expect(statusResponse.ok()).toBe(true);
   const statusBody = await statusResponse.json();
   expect(statusBody).toMatchObject({
-    asset: { status: "TRANSCRIBING" },
+    asset: { status: "READY" },
     job: { attempt: 1, status: "SUCCEEDED" },
   });
   expect(JSON.stringify(statusBody)).not.toContain("storage_key");
+
+  const creativeId = new URL(page.url()).pathname.split("/").at(-1);
+  const dnaResponse = await page.request.get(
+    `/api/creative/${creativeId}/deconstruction`,
+  );
+  expect(dnaResponse.ok()).toBe(true);
+  await expect(dnaResponse.json()).resolves.toMatchObject({
+    lineage: {
+      model: "mock-analysis-v1",
+      prompt_version: "creative-dna.v1",
+      provider: "mock",
+      schema_version: "1.0",
+    },
+    payload: {
+      observations: [{ kind: "OBSERVED" }, { kind: "INFERRED" }],
+      schema_version: "1.0",
+    },
+  });
 });

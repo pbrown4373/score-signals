@@ -9,6 +9,9 @@ const serverEnvironmentSchema = z.object({
     .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
     .default("info"),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
+  OPENAI_API_KEY: z.string().min(1).optional(),
+  SCORE_MODEL_TRANSCRIPTION: z.string().min(1).default("gpt-transcribe"),
+  SCORE_MODEL_ANALYSIS: z.string().min(1).default("gpt-5.6-luna"),
   MAX_UPLOAD_MB: z.coerce.number().int().positive().max(5000).default(250),
   MAX_VIDEO_DURATION_SECONDS: z.coerce
     .number()
@@ -30,6 +33,12 @@ const serverEnvironmentSchema = z.object({
   S3_BUCKET: z.string().min(1).optional(),
   S3_ACCESS_KEY_ID: z.string().min(1).optional(),
   S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+  ANALYSIS_PROVIDER_MAX_ATTEMPTS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(5)
+    .default(3),
 });
 
 export type ServerEnvironment = z.infer<typeof serverEnvironmentSchema>;

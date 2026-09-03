@@ -8,7 +8,7 @@ import { createStorageAdapter } from "@/lib/providers/storage/registry";
 import { createServiceClient } from "@/lib/supabase/service";
 import { MediaError } from "@/modules/media/errors";
 import { requireMediaRequest } from "@/modules/media/http";
-import { processMediaJob } from "@/modules/media/processor";
+import { processJobChain } from "@/modules/jobs/process-job-chain";
 import { MediaWorkerRepository } from "@/modules/media/repository";
 import { validateUploadedVideo } from "@/modules/media/validation";
 
@@ -68,9 +68,7 @@ export async function POST(request: NextRequest) {
       sha256: verified.sha256,
     });
     if (environment.SCORE_PROVIDER_MODE === "mock") {
-      await new InlineMockJobDispatcher((id) =>
-        processMediaJob(id, { repository: workerRepository, storage }),
-      ).dispatch(jobId);
+      await new InlineMockJobDispatcher(processJobChain).dispatch(jobId);
     }
     return NextResponse.json(
       { creative_asset_id: assetId, job_id: jobId, status: "QUEUED" },

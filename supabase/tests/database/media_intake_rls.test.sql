@@ -279,6 +279,7 @@ select results_eq(
     where payload ->> 'creative_asset_id' = (
       select id::text from public.creative_assets where title = 'Alpha Creative'
     )
+      and kind = 'MEDIA_PROCESSING'
   $$,
   $$ values ('SUCCEEDED'::text, 1) $$,
   'Successful job retains its attempt count'
@@ -290,7 +291,7 @@ select lives_ok(
       (select id from public.background_jobs
        where payload ->> 'creative_asset_id' = (
          select id::text from public.creative_assets where title = 'Alpha Creative'
-       )),
+       ) and kind = 'MEDIA_PROCESSING'),
       '{"duration_ms":1200,"width":1080,"height":1920}'::jsonb,
       '[]'::jsonb
     )
@@ -380,7 +381,7 @@ select results_eq(
   $$
     select
       (select count(*) from public.creative_assets),
-      (select count(*) from public.background_jobs),
+      (select count(*) from public.background_jobs where kind = 'MEDIA_PROCESSING'),
       (select count(*) from public.media_artifacts)
   $$,
   $$ values (2::bigint, 2::bigint, 4::bigint) $$,

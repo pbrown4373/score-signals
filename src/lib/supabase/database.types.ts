@@ -305,6 +305,135 @@ export type Database = {
           },
         ];
       };
+      deconstructions: {
+        Row: {
+          created_at: string;
+          creative_asset_id: string;
+          generation_run_id: string;
+          id: string;
+          payload: Json;
+          schema_version: string;
+          summary: string | null;
+          tenant_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          creative_asset_id: string;
+          generation_run_id: string;
+          id?: string;
+          payload: Json;
+          schema_version: string;
+          summary?: string | null;
+          tenant_id: string;
+        };
+        Update: {
+          created_at?: string;
+          creative_asset_id?: string;
+          generation_run_id?: string;
+          id?: string;
+          payload?: Json;
+          schema_version?: string;
+          summary?: string | null;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "deconstructions_tenant_id_creative_asset_id_fkey";
+            columns: ["tenant_id", "creative_asset_id"];
+            isOneToOne: true;
+            referencedRelation: "creative_assets";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "deconstructions_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "deconstructions_tenant_id_generation_run_id_fkey";
+            columns: ["tenant_id", "generation_run_id"];
+            isOneToOne: false;
+            referencedRelation: "generation_runs";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      generation_runs: {
+        Row: {
+          attempt: number;
+          completed_at: string | null;
+          cost_microusd: number | null;
+          created_at: string;
+          error_code: string | null;
+          error_message: string | null;
+          id: string;
+          idempotency_key: string;
+          input_fingerprint: string;
+          kind: Database["public"]["Enums"]["generation_kind"];
+          latency_ms: number | null;
+          model: string;
+          prompt_version: string | null;
+          provider: string;
+          request_metadata: Json;
+          schema_version: string;
+          status: Database["public"]["Enums"]["generation_status"];
+          tenant_id: string;
+          usage_metadata: Json;
+        };
+        Insert: {
+          attempt?: number;
+          completed_at?: string | null;
+          cost_microusd?: number | null;
+          created_at?: string;
+          error_code?: string | null;
+          error_message?: string | null;
+          id?: string;
+          idempotency_key: string;
+          input_fingerprint: string;
+          kind: Database["public"]["Enums"]["generation_kind"];
+          latency_ms?: number | null;
+          model: string;
+          prompt_version?: string | null;
+          provider: string;
+          request_metadata?: Json;
+          schema_version: string;
+          status?: Database["public"]["Enums"]["generation_status"];
+          tenant_id: string;
+          usage_metadata?: Json;
+        };
+        Update: {
+          attempt?: number;
+          completed_at?: string | null;
+          cost_microusd?: number | null;
+          created_at?: string;
+          error_code?: string | null;
+          error_message?: string | null;
+          id?: string;
+          idempotency_key?: string;
+          input_fingerprint?: string;
+          kind?: Database["public"]["Enums"]["generation_kind"];
+          latency_ms?: number | null;
+          model?: string;
+          prompt_version?: string | null;
+          provider?: string;
+          request_metadata?: Json;
+          schema_version?: string;
+          status?: Database["public"]["Enums"]["generation_status"];
+          tenant_id?: string;
+          usage_metadata?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "generation_runs_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       media_artifacts: {
         Row: {
           byte_size: number | null;
@@ -630,6 +759,70 @@ export type Database = {
         };
         Relationships: [];
       };
+      transcripts: {
+        Row: {
+          created_at: string;
+          creative_asset_id: string;
+          generation_run_id: string;
+          id: string;
+          language: string | null;
+          model: string;
+          provider: string;
+          schema_version: string;
+          segments: Json;
+          tenant_id: string;
+          text_content: string;
+        };
+        Insert: {
+          created_at?: string;
+          creative_asset_id: string;
+          generation_run_id: string;
+          id?: string;
+          language?: string | null;
+          model: string;
+          provider: string;
+          schema_version: string;
+          segments?: Json;
+          tenant_id: string;
+          text_content: string;
+        };
+        Update: {
+          created_at?: string;
+          creative_asset_id?: string;
+          generation_run_id?: string;
+          id?: string;
+          language?: string | null;
+          model?: string;
+          provider?: string;
+          schema_version?: string;
+          segments?: Json;
+          tenant_id?: string;
+          text_content?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "transcripts_tenant_id_creative_asset_id_fkey";
+            columns: ["tenant_id", "creative_asset_id"];
+            isOneToOne: true;
+            referencedRelation: "creative_assets";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "transcripts_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "transcripts_tenant_id_generation_run_id_fkey";
+            columns: ["tenant_id", "generation_run_id"];
+            isOneToOne: false;
+            referencedRelation: "generation_runs";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       user_profiles: {
         Row: {
           created_at: string;
@@ -658,6 +851,14 @@ export type Database = {
     Functions: {
       bootstrap_brand_brain: { Args: { input: Json }; Returns: string };
       bootstrap_tenant: { Args: { requested_name: string }; Returns: string };
+      claim_analysis_job: {
+        Args: { requested_job_id: string };
+        Returns: {
+          attempt: number;
+          creative_asset_id: string;
+          tenant_id: string;
+        }[];
+      };
       claim_media_job: {
         Args: { requested_job_id: string };
         Returns: {
@@ -665,6 +866,18 @@ export type Database = {
           creative_asset_id: string;
           tenant_id: string;
         }[];
+      };
+      complete_creative_dna_run: {
+        Args: {
+          creative_dna: Json;
+          requested_cost_microusd: number;
+          requested_job_id: string;
+          requested_latency_ms: number;
+          requested_run_id: string;
+          requested_summary: string;
+          requested_usage_metadata: Json;
+        };
+        Returns: string;
       };
       complete_creative_upload: {
         Args: {
@@ -675,6 +888,27 @@ export type Database = {
           verified_sha256: string;
         };
         Returns: string;
+      };
+      complete_transcription_run: {
+        Args: {
+          requested_cost_microusd: number;
+          requested_latency_ms: number;
+          requested_run_id: string;
+          requested_usage_metadata: Json;
+          transcript_language: string;
+          transcript_segments: Json;
+          transcript_text: string;
+        };
+        Returns: string;
+      };
+      fail_analysis_job: {
+        Args: {
+          requested_error_code: string;
+          requested_error_message: string;
+          requested_job_id: string;
+          requested_run_id: string;
+        };
+        Returns: undefined;
       };
       fail_media_job: {
         Args: {
@@ -690,7 +924,7 @@ export type Database = {
           media_metadata: Json;
           requested_job_id: string;
         };
-        Returns: undefined;
+        Returns: string;
       };
       initialize_creative_upload: {
         Args: {
@@ -717,6 +951,20 @@ export type Database = {
         Args: { requested_asset_id: string };
         Returns: string;
       };
+      start_generation_run: {
+        Args: {
+          requested_asset_id: string;
+          requested_idempotency_key: string;
+          requested_input_fingerprint: string;
+          requested_kind: Database["public"]["Enums"]["generation_kind"];
+          requested_model: string;
+          requested_prompt_version: string;
+          requested_provider: string;
+          requested_schema_version: string;
+          requested_tenant_id: string;
+        };
+        Returns: string;
+      };
     };
     Enums: {
       artifact_kind:
@@ -738,6 +986,21 @@ export type Database = {
         | "READY"
         | "FAILED"
         | "CANCELLED";
+      generation_kind:
+        | "TRANSCRIPTION"
+        | "CREATIVE_DNA"
+        | "SKELETON"
+        | "COMPOSITION"
+        | "ORIGINALITY"
+        | "EMBEDDING"
+        | "OTHER";
+      generation_status:
+        | "QUEUED"
+        | "GENERATING"
+        | "EVALUATING"
+        | "REGENERATING"
+        | "COMPLETED"
+        | "FAILED";
       media_upload_status: "INITIATED" | "VALIDATED" | "REJECTED";
       membership_role: "OWNER" | "ADMIN" | "MEMBER" | "VIEWER";
       source_type:
@@ -903,6 +1166,23 @@ export const Constants = {
         "READY",
         "FAILED",
         "CANCELLED",
+      ],
+      generation_kind: [
+        "TRANSCRIPTION",
+        "CREATIVE_DNA",
+        "SKELETON",
+        "COMPOSITION",
+        "ORIGINALITY",
+        "EMBEDDING",
+        "OTHER",
+      ],
+      generation_status: [
+        "QUEUED",
+        "GENERATING",
+        "EVALUATING",
+        "REGENERATING",
+        "COMPLETED",
+        "FAILED",
       ],
       media_upload_status: ["INITIATED", "VALIDATED", "REJECTED"],
       membership_role: ["OWNER", "ADMIN", "MEMBER", "VIEWER"],

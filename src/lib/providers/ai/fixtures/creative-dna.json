@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "identity": {
+    "platform": "unknown",
+    "format": "short-form product demonstration",
+    "duration_seconds": 1,
+    "advertiser_or_creator": null,
+    "industry": "home organization",
+    "product_category": "organization kit"
+  },
+  "opening": {
+    "hook_type": "problem-first demonstration",
+    "first_spoken_line": "A common organization problem is introduced.",
+    "first_visual": "A creator appears in a synthetic demonstration frame.",
+    "pattern_interrupt": null,
+    "promise": "A compact kit may make the task simpler.",
+    "curiosity_mechanism": "The viewer waits to see the demonstrated solution.",
+    "confidence": 0.72
+  },
+  "psychology": {
+    "primary_desire": "A calmer, more organized space",
+    "primary_problem": "Organization feels difficult or time-consuming",
+    "emotional_triggers": ["relief", "control"],
+    "awareness_stage": "problem aware",
+    "objections": ["The solution may require too much setup"],
+    "identity_signals": ["practical organizer"],
+    "confidence": 0.61
+  },
+  "story": {
+    "beat_map": [
+      {
+        "order": 1,
+        "role": "problem",
+        "description": "Introduces an organization problem."
+      },
+      {
+        "order": 2,
+        "role": "demonstration",
+        "description": "Shows a compact kit as the response."
+      },
+      {
+        "order": 3,
+        "role": "call to action",
+        "description": "Invites the viewer to learn more."
+      }
+    ],
+    "conflict": "The current organization process feels cumbersome.",
+    "reveal": "A compact kit is presented.",
+    "resolution": "The kit is positioned as a practical option.",
+    "cta": "Learn more"
+  },
+  "proof": {
+    "types": ["product detail"],
+    "details": ["A documented material detail is mentioned."],
+    "confidence": 0.66
+  },
+  "production": {
+    "camera_style": "direct-to-camera with demonstration",
+    "creator_archetype": "practical guide",
+    "setting": "indeterminate synthetic setting",
+    "shot_frequency": "not reliably observable from sampled frames",
+    "text_overlays": [],
+    "audio_style": "spoken explanation",
+    "editing_speed": "not reliably observable from sampled frames",
+    "b_roll_usage": "product demonstration",
+    "product_visibility": "product is shown during the demonstration"
+  },
+  "offer": {
+    "price": null,
+    "discount": null,
+    "bundle": null,
+    "guarantee": null,
+    "scarcity": null,
+    "trial": null,
+    "cta_style": "low-pressure learn more"
+  },
+  "assessment": {
+    "why_it_may_work": [
+      "Problem-to-demonstration structure is easy to follow."
+    ],
+    "structural_reusability": 78,
+    "brand_specificity": 35,
+    "evidence_limitations": [
+      "No performance metrics were supplied.",
+      "Only representative frames were reviewed."
+    ]
+  },
+  "observations": [
+    {
+      "kind": "OBSERVED",
+      "statement": "The transcript follows a problem, demonstration, detail, and CTA sequence.",
+      "confidence": 0.91
+    },
+    {
+      "kind": "INFERRED",
+      "statement": "The structure may appeal to viewers seeking a simpler routine.",
+      "confidence": 0.58
+    }
+  ]
+}

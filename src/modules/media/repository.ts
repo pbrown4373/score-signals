@@ -207,13 +207,14 @@ export class MediaWorkerRepository {
       mime_type: string;
       storage_key: string;
     }>,
-  ): Promise<void> {
-    const { error } = await this.supabase.rpc("finish_media_job", {
+  ): Promise<string> {
+    const { data, error } = await this.supabase.rpc("finish_media_job", {
       derived_artifacts: artifacts,
       media_metadata: metadata,
       requested_job_id: jobId,
     });
-    if (error) throw repositoryError("finish media job", error);
+    if (error || !data) throw repositoryError("finish media job", error);
+    return data;
   }
 
   async fail(jobId: string, error: MediaError): Promise<void> {
