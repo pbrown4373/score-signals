@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 
 import { MediaRetryButton } from "@/components/media-retry-button";
 import { CreativeDNAResult } from "@/components/creative-dna-result";
+import { SkeletonResult } from "@/components/skeleton-result";
 import { createClient } from "@/lib/supabase/server";
 import { AnalysisRepository } from "@/modules/analysis/repository";
-import { parseCreativeDNA } from "@/modules/analysis/validation";
+import { parseCreativeDNA, parseSkeleton } from "@/modules/analysis/validation";
 import { MediaRepository } from "@/modules/media/repository";
 import { requireTenantContext } from "@/modules/tenancy/context";
 
@@ -17,9 +18,10 @@ export default async function CreativePage({
   const { creativeId } = await params;
   const context = await requireTenantContext();
   const supabase = await createClient();
-  const [creative, analysis] = await Promise.all([
+  const [creative, analysis, skeleton] = await Promise.all([
     new MediaRepository(supabase, context.tenant.id).getCreative(creativeId),
     new AnalysisRepository(supabase, context.tenant.id).getResult(creativeId),
+    new AnalysisRepository(supabase, context.tenant.id).getSkeleton(creativeId),
   ]);
   if (!creative) notFound();
 
@@ -106,7 +108,8 @@ export default async function CreativePage({
           summary={analysis.deconstruction.summary}
         />
       ) : creative.asset.status === "TRANSCRIBING" ||
-        creative.asset.status === "ANALYZING" ? (
+        creative.asset.status === "ANALYZING" ||
+        creative.asset.status === "SKELETONIZING" ? (
         <section
           className="mt-8 rounded-2xl border border-[var(--line)] bg-white p-6"
           aria-live="polite"
@@ -116,6 +119,12 @@ export default async function CreativePage({
             Current stage: {creative.asset.status.toLowerCase()}.
           </p>
         </section>
+      ) : null}
+      {skeleton ? (
+        <SkeletonResult
+          run={skeleton.generationRun}
+          skeleton={parseSkeleton(skeleton.skeleton.payload)}
+        />
       ) : null}
     </main>
   );

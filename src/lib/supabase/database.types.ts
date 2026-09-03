@@ -665,6 +665,112 @@ export type Database = {
           },
         ];
       };
+      skeleton_restricted_elements: {
+        Row: {
+          created_at: string;
+          element_type: Database["public"]["Enums"]["restricted_element_type"];
+          id: string;
+          normalized_value: string;
+          severity: number;
+          skeleton_id: string;
+          tenant_id: string;
+          value: string;
+        };
+        Insert: {
+          created_at?: string;
+          element_type: Database["public"]["Enums"]["restricted_element_type"];
+          id?: string;
+          normalized_value: string;
+          severity: number;
+          skeleton_id: string;
+          tenant_id: string;
+          value: string;
+        };
+        Update: {
+          created_at?: string;
+          element_type?: Database["public"]["Enums"]["restricted_element_type"];
+          id?: string;
+          normalized_value?: string;
+          severity?: number;
+          skeleton_id?: string;
+          tenant_id?: string;
+          value?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "skeleton_restricted_elements_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "skeleton_restricted_elements_tenant_id_skeleton_id_fkey";
+            columns: ["tenant_id", "skeleton_id"];
+            isOneToOne: false;
+            referencedRelation: "skeletons";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      skeletons: {
+        Row: {
+          canonical_text: string;
+          created_at: string;
+          deconstruction_id: string;
+          embedding_model: string | null;
+          generation_run_id: string;
+          id: string;
+          payload: Json;
+          schema_version: string;
+          tenant_id: string;
+        };
+        Insert: {
+          canonical_text: string;
+          created_at?: string;
+          deconstruction_id: string;
+          embedding_model?: string | null;
+          generation_run_id: string;
+          id?: string;
+          payload: Json;
+          schema_version: string;
+          tenant_id: string;
+        };
+        Update: {
+          canonical_text?: string;
+          created_at?: string;
+          deconstruction_id?: string;
+          embedding_model?: string | null;
+          generation_run_id?: string;
+          id?: string;
+          payload?: Json;
+          schema_version?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "skeletons_tenant_id_deconstruction_id_fkey";
+            columns: ["tenant_id", "deconstruction_id"];
+            isOneToOne: true;
+            referencedRelation: "deconstructions";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "skeletons_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "skeletons_tenant_id_generation_run_id_fkey";
+            columns: ["tenant_id", "generation_run_id"];
+            isOneToOne: false;
+            referencedRelation: "generation_runs";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       sources: {
         Row: {
           created_at: string;
@@ -889,6 +995,19 @@ export type Database = {
         };
         Returns: string;
       };
+      complete_skeleton_run: {
+        Args: {
+          requested_cost_microusd: number;
+          requested_deconstruction_id: string;
+          requested_job_id: string;
+          requested_latency_ms: number;
+          requested_run_id: string;
+          requested_usage_metadata: Json;
+          restricted_elements: Json;
+          skeleton_payload: Json;
+        };
+        Returns: string;
+      };
       complete_transcription_run: {
         Args: {
           requested_cost_microusd: number;
@@ -1003,6 +1122,14 @@ export type Database = {
         | "FAILED";
       media_upload_status: "INITIATED" | "VALIDATED" | "REJECTED";
       membership_role: "OWNER" | "ADMIN" | "MEMBER" | "VIEWER";
+      restricted_element_type:
+        | "PHRASE"
+        | "UNIQUE_FACT"
+        | "METAPHOR"
+        | "SCENE"
+        | "CLAIM"
+        | "NAME"
+        | "OTHER";
       source_type:
         | "UPLOAD"
         | "URL"
@@ -1186,6 +1313,15 @@ export const Constants = {
       ],
       media_upload_status: ["INITIATED", "VALIDATED", "REJECTED"],
       membership_role: ["OWNER", "ADMIN", "MEMBER", "VIEWER"],
+      restricted_element_type: [
+        "PHRASE",
+        "UNIQUE_FACT",
+        "METAPHOR",
+        "SCENE",
+        "CLAIM",
+        "NAME",
+        "OTHER",
+      ],
       source_type: [
         "UPLOAD",
         "URL",

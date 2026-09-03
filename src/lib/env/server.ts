@@ -12,6 +12,7 @@ const serverEnvironmentSchema = z.object({
   OPENAI_API_KEY: z.string().min(1).optional(),
   SCORE_MODEL_TRANSCRIPTION: z.string().min(1).default("gpt-transcribe"),
   SCORE_MODEL_ANALYSIS: z.string().min(1).default("gpt-5.6-luna"),
+  SCORE_MODEL_SKELETON: z.string().min(1).default("gpt-5.6-luna"),
   MAX_UPLOAD_MB: z.coerce.number().int().positive().max(5000).default(250),
   MAX_VIDEO_DURATION_SECONDS: z.coerce
     .number()

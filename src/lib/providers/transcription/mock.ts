@@ -14,12 +14,12 @@ export class MockTranscriptionProvider implements TranscriptionProvider {
     private readonly output: TranscriptOutput = {
       schema_version: "1.0",
       language: "en",
-      text: "A creator introduces a common organization problem, demonstrates a compact kit, gives a documented material detail, and invites viewers to learn more.",
+      text: "Mara Vale calls this the moonlight reset. She says it followed a 47-day lighthouse challenge, compares the change to charging your body like a solar lantern, and then a red umbrella opens inside a freezer. She demonstrates a compact kit, gives a documented material detail, and invites viewers to learn more.",
       segments: [
         {
           start_seconds: 0,
           end_seconds: 1,
-          text: "A creator presents a short product demonstration.",
+          text: "Mara Vale presents a distinctive story and product demonstration.",
         },
       ],
     },

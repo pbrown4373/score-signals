@@ -6,13 +6,21 @@ import { createStorageAdapter } from "@/lib/providers/storage/registry";
 import type { TranscriptionProvider } from "@/lib/providers/transcription/contracts";
 import { createTranscriptionProvider } from "@/lib/providers/transcription/registry";
 import { createServiceClient } from "@/lib/supabase/service";
-import type { TranscriptOutput } from "@/modules/analysis/contracts";
+import type {
+  CreativeDNA,
+  TranscriptOutput,
+} from "@/modules/analysis/contracts";
 import { fingerprint } from "@/modules/analysis/fingerprint";
 import {
   buildCreativeDnaInput,
   creativeDnaInstructions,
   creativeDnaPromptVersion,
 } from "@/modules/analysis/prompts/creative-dna.v1";
+import {
+  buildSkeletonInput,
+  skeletonInstructions,
+  skeletonPromptVersion,
+} from "@/modules/analysis/prompts/skeleton.v1";
 import {
   AnalysisWorkerRepository,
   type AnalysisWorkerStore,
@@ -21,8 +29,11 @@ import { withTransientRetry } from "@/modules/analysis/retry";
 import {
   creativeDnaSchemaVersion,
   parseCreativeDNA,
+  parseSkeletonExtraction,
   parseTranscript,
+  skeletonSchemaVersion,
   strictCreativeDnaProviderSchema,
+  strictSkeletonExtractionProviderSchema,
   transcriptSchemaVersion,
 } from "@/modules/analysis/validation";
 import { MediaError } from "@/modules/media/errors";
@@ -31,6 +42,7 @@ export async function processAnalysisJob(
   jobId: string,
   dependencies: {
     gateway?: ModelGateway;
+    skeletonGateway?: ModelGateway;
     repository?: AnalysisWorkerStore;
     storage?: StorageAdapter;
     transcription?: TranscriptionProvider;
@@ -47,10 +59,15 @@ export async function processAnalysisJob(
   const transcription =
     dependencies.transcription ?? createTranscriptionProvider();
   const gateway = dependencies.gateway ?? createModelGateway();
+  const skeletonGateway =
+    dependencies.skeletonGateway ?? createModelGateway("skeleton");
   let activeRunId: string | null = null;
 
   try {
-    const inputs = await repository.getInputs(claim.creative_asset_id);
+    const inputs = await repository.getInputs(
+      claim.creative_asset_id,
+      claim.tenant_id,
+    );
     let transcript = existingTranscript(inputs.transcript);
 
     if (!transcript) {
@@ -97,62 +114,113 @@ export async function processAnalysisJob(
       await repository.completeTranscript(activeRunId, transcript, invocation);
     }
 
-    const frames = inputs.artifacts.filter(
-      (artifact) => artifact.kind === "FRAME",
-    );
-    const frameObjects = await Promise.all(
-      frames.map(async (frame) => ({
-        body: (await storage.getObject(frame.storage_key)).body,
-        metadata: frame.metadata,
-        mimeType: frame.mime_type,
-      })),
-    );
-    const promptInput = buildCreativeDnaInput({
-      durationMs: inputs.asset.duration_ms,
-      frameTiming: frameObjects.map((frame) =>
-        isRecord(frame.metadata) ? frame.metadata : {},
-      ),
-      height: inputs.asset.height,
-      mimeType: inputs.asset.mime_type,
-      transcript: transcript.text,
-      width: inputs.asset.width,
-    });
-    const dnaFingerprint = fingerprint({
-      content: inputs.asset.content_sha256,
-      frames: frameObjects.map((frame) => frame.metadata),
-      model: gateway.model,
-      prompt: creativeDnaPromptVersion,
-      schema: creativeDnaSchemaVersion,
+    let dna = existingCreativeDNA(inputs.deconstruction?.payload);
+    let deconstructionId = inputs.deconstruction?.id ?? null;
+
+    if (!dna || !deconstructionId) {
+      const frames = inputs.artifacts.filter(
+        (artifact) => artifact.kind === "FRAME",
+      );
+      const frameObjects = await Promise.all(
+        frames.map(async (frame) => ({
+          body: (await storage.getObject(frame.storage_key)).body,
+          metadata: frame.metadata,
+          mimeType: frame.mime_type,
+        })),
+      );
+      const promptInput = buildCreativeDnaInput({
+        durationMs: inputs.asset.duration_ms,
+        frameTiming: frameObjects.map((frame) =>
+          isRecord(frame.metadata) ? frame.metadata : {},
+        ),
+        height: inputs.asset.height,
+        mimeType: inputs.asset.mime_type,
+        transcript: transcript.text,
+        width: inputs.asset.width,
+      });
+      const dnaFingerprint = fingerprint({
+        content: inputs.asset.content_sha256,
+        frames: frameObjects.map((frame) => frame.metadata),
+        model: gateway.model,
+        prompt: creativeDnaPromptVersion,
+        schema: creativeDnaSchemaVersion,
+        transcript: fingerprint(transcript),
+      });
+      activeRunId = await repository.startRun({
+        assetId: claim.creative_asset_id,
+        fingerprint: dnaFingerprint,
+        idempotencyKey: `creative-dna:${claim.creative_asset_id}:${dnaFingerprint.slice(0, 24)}`,
+        kind: "CREATIVE_DNA",
+        model: gateway.model,
+        promptVersion: creativeDnaPromptVersion,
+        provider: gateway.provider,
+        schemaVersion: creativeDnaSchemaVersion,
+        tenantId: claim.tenant_id,
+      });
+      const invocation = await withTransientRetry(
+        () =>
+          gateway.generateStructured({
+            images: frameObjects.flatMap((frame) =>
+              isImageMime(frame.mimeType)
+                ? [{ body: frame.body, mimeType: frame.mimeType }]
+                : [],
+            ),
+            instructions: creativeDnaInstructions,
+            schema: strictCreativeDnaProviderSchema(),
+            schemaName: "creative_dna_v1",
+            text: promptInput,
+          }),
+        environment.ANALYSIS_PROVIDER_MAX_ATTEMPTS,
+      );
+      dna = parseCreativeDNA(invocation.output);
+      deconstructionId = await repository.completeCreativeDNA(
+        jobId,
+        activeRunId,
+        dna,
+        invocation,
+      );
+    }
+
+    const skeletonFingerprint = fingerprint({
+      creative_dna: fingerprint(dna),
+      model: skeletonGateway.model,
+      prompt: skeletonPromptVersion,
+      schema: skeletonSchemaVersion,
       transcript: fingerprint(transcript),
     });
     activeRunId = await repository.startRun({
       assetId: claim.creative_asset_id,
-      fingerprint: dnaFingerprint,
-      idempotencyKey: `creative-dna:${claim.creative_asset_id}:${dnaFingerprint.slice(0, 24)}`,
-      kind: "CREATIVE_DNA",
-      model: gateway.model,
-      promptVersion: creativeDnaPromptVersion,
-      provider: gateway.provider,
-      schemaVersion: creativeDnaSchemaVersion,
+      fingerprint: skeletonFingerprint,
+      idempotencyKey: `skeleton:${claim.creative_asset_id}:${skeletonFingerprint.slice(0, 24)}`,
+      kind: "SKELETON",
+      model: skeletonGateway.model,
+      promptVersion: skeletonPromptVersion,
+      provider: skeletonGateway.provider,
+      schemaVersion: skeletonSchemaVersion,
       tenantId: claim.tenant_id,
     });
-    const invocation = await withTransientRetry(
+    const skeletonInvocation = await withTransientRetry(
       () =>
-        gateway.generateStructured({
-          images: frameObjects.flatMap((frame) =>
-            isImageMime(frame.mimeType)
-              ? [{ body: frame.body, mimeType: frame.mimeType }]
-              : [],
-          ),
-          instructions: creativeDnaInstructions,
-          schema: strictCreativeDnaProviderSchema(),
-          schemaName: "creative_dna_v1",
-          text: promptInput,
+        skeletonGateway.generateStructured({
+          images: [],
+          instructions: skeletonInstructions,
+          schema: strictSkeletonExtractionProviderSchema(),
+          schemaName: "skeleton_extraction_v1",
+          text: buildSkeletonInput({
+            creativeDna: dna,
+            transcript: transcript.text,
+          }),
         }),
       environment.ANALYSIS_PROVIDER_MAX_ATTEMPTS,
     );
-    const dna = parseCreativeDNA(invocation.output);
-    await repository.completeCreativeDNA(jobId, activeRunId, dna, invocation);
+    const extraction = parseSkeletonExtraction(skeletonInvocation.output);
+    await repository.completeSkeleton(
+      jobId,
+      activeRunId,
+      deconstructionId,
+      extraction,
+      skeletonInvocation,
+    );
   } catch (cause) {
     const error =
       cause instanceof MediaError
@@ -166,6 +234,10 @@ export async function processAnalysisJob(
           );
     await repository.fail(jobId, activeRunId, error);
   }
+}
+
+function existingCreativeDNA(payload: unknown): CreativeDNA | null {
+  return payload ? parseCreativeDNA(payload) : null;
 }
 
 function existingTranscript(

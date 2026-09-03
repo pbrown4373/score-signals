@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(25);
+select plan(40);
 
 insert into auth.users (id, email) values
   ('61000000-0000-0000-0000-000000000001', 'analysis-owner-a@example.test'),
@@ -140,8 +140,8 @@ select lives_ok(
 
 select results_eq(
   $$ select status::text from public.creative_assets where id = '61110000-0000-0000-0000-000000000001' $$,
-  $$ values ('READY'::text) $$,
-  'Creative DNA completion advances the creative to READY'
+  $$ values ('SKELETONIZING'::text) $$,
+  'Creative DNA completion advances the creative to Skeleton extraction'
 );
 
 select results_eq(
@@ -158,8 +158,8 @@ select results_eq(
 
 select results_eq(
   $$ select status::text from public.background_jobs where kind = 'CREATIVE_ANALYSIS' and payload ->> 'creative_asset_id' = '61110000-0000-0000-0000-000000000001' $$,
-  $$ values ('SUCCEEDED'::text) $$,
-  'Analysis job completes durably'
+  $$ values ('RUNNING'::text) $$,
+  'Analysis job remains active for the Skeleton boundary'
 );
 
 select lives_ok(
@@ -177,6 +177,70 @@ select results_eq(
   'Completion replay does not duplicate Creative DNA'
 );
 
+select lives_ok(
+  $$ select public.start_generation_run(
+    (select tenant_id from public.background_jobs where kind = 'CREATIVE_ANALYSIS' and payload ->> 'creative_asset_id' = '61110000-0000-0000-0000-000000000001'),
+    '61110000-0000-0000-0000-000000000001', 'SKELETON',
+    'skeleton-alpha-fingerprint', 'mock', 'mock-skeleton-v1',
+    'skeleton.v1', '1.0', repeat('1', 64)
+  ) $$,
+  'Worker starts a Skeleton lineage run'
+);
+
+select lives_ok(
+  $$ select public.complete_skeleton_run(
+    (select id from public.background_jobs where kind = 'CREATIVE_ANALYSIS' and payload ->> 'creative_asset_id' = '61110000-0000-0000-0000-000000000001'),
+    (select id from public.generation_runs where kind = 'SKELETON'),
+    (select id from public.deconstructions where creative_asset_id = '61110000-0000-0000-0000-000000000001'),
+    '{"schema_version":"1.0","canonical_text":"problem function -> evidence function -> next step"}',
+    '[{"element_type":"NAME","value":"Mara Vale","normalized_value":"mara vale","severity":5},{"element_type":"PHRASE","value":"moonlight reset","normalized_value":"moonlight reset","severity":5}]',
+    '{"input_tokens":120,"output_tokens":180,"provider_request_id":"mock-skeleton"}',
+    0, 18
+  ) $$,
+  'Validated Skeleton and restricted elements persist atomically'
+);
+
+select results_eq(
+  $$ select status::text from public.creative_assets where id = '61110000-0000-0000-0000-000000000001' $$,
+  $$ values ('READY'::text) $$,
+  'Skeleton completion advances the creative to READY'
+);
+
+select results_eq(
+  $$ select count(*) from public.skeletons $$,
+  $$ values (1::bigint) $$,
+  'Skeleton is persisted once'
+);
+
+select results_eq(
+  $$ select count(*) from public.skeleton_restricted_elements $$,
+  $$ values (2::bigint) $$,
+  'Source-derived restricted elements are stored separately'
+);
+
+select results_eq(
+  $$ select provider, model, prompt_version, schema_version, status::text from public.generation_runs where kind = 'SKELETON' $$,
+  $$ values ('mock'::text, 'mock-skeleton-v1'::text, 'skeleton.v1'::text, '1.0'::text, 'COMPLETED'::text) $$,
+  'Skeleton preserves complete generation lineage'
+);
+
+select results_eq(
+  $$ select status::text from public.background_jobs where kind = 'CREATIVE_ANALYSIS' and payload ->> 'creative_asset_id' = '61110000-0000-0000-0000-000000000001' $$,
+  $$ values ('SUCCEEDED'::text) $$,
+  'Skeleton completion finishes the durable analysis job'
+);
+
+select lives_ok(
+  $$ select public.complete_skeleton_run(
+    (select id from public.background_jobs where kind = 'CREATIVE_ANALYSIS' and payload ->> 'creative_asset_id' = '61110000-0000-0000-0000-000000000001'),
+    (select id from public.generation_runs where kind = 'SKELETON'),
+    (select id from public.deconstructions where creative_asset_id = '61110000-0000-0000-0000-000000000001'),
+    '{"schema_version":"1.0","canonical_text":"problem function -> evidence function -> next step"}',
+    '[]', '{}', 0, 18
+  ) $$,
+  'Skeleton completion accepts a replay without replacing restricted elements'
+);
+
 reset role;
 set local role authenticated;
 set local request.jwt.claim.sub = '61000000-0000-0000-0000-000000000001';
@@ -184,6 +248,18 @@ select results_eq(
   $$ select count(*) from public.deconstructions $$,
   $$ values (1::bigint) $$,
   'Tenant owner reads own Creative DNA'
+);
+
+select results_eq(
+  $$ select count(*) from public.skeletons $$,
+  $$ values (1::bigint) $$,
+  'Tenant owner reads the abstract Skeleton'
+);
+
+select throws_ok(
+  $$ select count(*) from public.skeleton_restricted_elements $$,
+  '42501', null,
+  'Tenant browser role cannot read restricted source values'
 );
 
 reset role;
@@ -195,6 +271,12 @@ select results_eq(
   'Another tenant cannot read Creative DNA'
 );
 
+select results_eq(
+  $$ select count(*) from public.skeletons $$,
+  $$ values (0::bigint) $$,
+  'Another tenant cannot read the Skeleton'
+);
+
 reset role;
 set local role authenticated;
 set local request.jwt.claim.sub = '63000000-0000-0000-0000-000000000003';
@@ -202,6 +284,20 @@ select results_eq(
   $$ select count(*) from public.deconstructions $$,
   $$ values (1::bigint) $$,
   'Viewer can read own-tenant analysis'
+);
+
+select results_eq(
+  $$ select count(*) from public.skeletons $$,
+  $$ values (1::bigint) $$,
+  'Viewer can read the abstract Skeleton'
+);
+
+select throws_ok(
+  $$ insert into public.skeletons (
+    tenant_id, deconstruction_id, generation_run_id, schema_version, payload, canonical_text
+  ) select tenant_id, deconstruction_id, generation_run_id, schema_version, payload, canonical_text from public.skeletons limit 1 $$,
+  '42501', null,
+  'Viewer cannot write a Skeleton'
 );
 
 select throws_ok(
@@ -222,6 +318,18 @@ select throws_ok(
   'Authenticated browser role cannot complete generation runs'
 );
 
+select throws_ok(
+  $$ select public.complete_skeleton_run(
+    (select id from public.background_jobs limit 1),
+    (select id from public.generation_runs where kind = 'SKELETON' limit 1),
+    (select id from public.deconstructions limit 1),
+    '{"schema_version":"1.0","canonical_text":"unauthorized canonical structure value"}',
+    '[]', '{}', 0, 0
+  ) $$,
+  '42501', null,
+  'Authenticated browser role cannot complete Skeleton generation'
+);
+
 reset role;
 select throws_ok(
   $$ insert into public.deconstructions (
@@ -234,6 +342,19 @@ select throws_ok(
   ) $$,
   '23503', null,
   'Composite foreign keys reject cross-tenant analysis relationships'
+);
+
+select throws_ok(
+  $$ insert into public.skeletons (
+    tenant_id, deconstruction_id, generation_run_id, schema_version, payload, canonical_text
+  ) values (
+    (select id from public.tenants where name = 'Analysis Tenant Beta'),
+    (select id from public.deconstructions limit 1),
+    (select id from public.generation_runs where kind = 'SKELETON'),
+    '1.0', '{"schema_version":"1.0"}', 'cross tenant canonical structure'
+  ) $$,
+  '23503', null,
+  'Composite foreign keys reject cross-tenant Skeleton relationships'
 );
 
 set local role service_role;

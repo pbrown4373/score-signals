@@ -4,17 +4,25 @@ import type { Database, Json, Tables } from "@/lib/supabase/database.types";
 import type { ProviderInvocation } from "@/lib/providers/lineage";
 import type {
   CreativeDNA,
+  SkeletonExtraction,
   TranscriptOutput,
 } from "@/modules/analysis/contracts";
+import { normalizeRestrictedValue } from "@/modules/analysis/validation";
 import { MediaError } from "@/modules/media/errors";
 
 export type Deconstruction = Tables<"deconstructions">;
 export type GenerationRun = Tables<"generation_runs">;
 export type Transcript = Tables<"transcripts">;
+export type SkeletonRecord = Tables<"skeletons">;
 
 export type AnalysisResult = {
   deconstruction: Deconstruction;
   generationRun: GenerationRun;
+};
+
+export type SkeletonResult = {
+  generationRun: GenerationRun;
+  skeleton: SkeletonRecord;
 };
 
 export class AnalysisRepository {
@@ -43,6 +51,36 @@ export class AnalysisRepository {
     }
     return { deconstruction, generationRun };
   }
+
+  async getSkeleton(assetId: string): Promise<SkeletonResult | null> {
+    const { data: deconstruction, error: deconstructionError } =
+      await this.supabase
+        .from("deconstructions")
+        .select("id")
+        .eq("tenant_id", this.tenantId)
+        .eq("creative_asset_id", assetId)
+        .maybeSingle();
+    if (deconstructionError)
+      throw repositoryError("load Skeleton parent", deconstructionError);
+    if (!deconstruction) return null;
+    const { data: skeleton, error } = await this.supabase
+      .from("skeletons")
+      .select("*")
+      .eq("tenant_id", this.tenantId)
+      .eq("deconstruction_id", deconstruction.id)
+      .maybeSingle();
+    if (error) throw repositoryError("load Skeleton", error);
+    if (!skeleton) return null;
+    const { data: generationRun, error: runError } = await this.supabase
+      .from("generation_runs")
+      .select("*")
+      .eq("tenant_id", this.tenantId)
+      .eq("id", skeleton.generation_run_id)
+      .single();
+    if (runError || !generationRun)
+      throw repositoryError("load Skeleton lineage", runError);
+    return { generationRun, skeleton };
+  }
 }
 
 export class AnalysisWorkerRepository {
@@ -66,22 +104,31 @@ export class AnalysisWorkerRepository {
     return data?.[0] ?? null;
   }
 
-  async getInputs(assetId: string) {
-    const [asset, artifacts, transcript] = await Promise.all([
+  async getInputs(assetId: string, tenantId: string) {
+    const [asset, artifacts, transcript, deconstruction] = await Promise.all([
       this.supabase
         .from("creative_assets")
         .select("*")
+        .eq("tenant_id", tenantId)
         .eq("id", assetId)
         .single(),
       this.supabase
         .from("media_artifacts")
         .select("*")
+        .eq("tenant_id", tenantId)
         .eq("creative_asset_id", assetId)
         .in("kind", ["AUDIO", "NORMALIZED_VIDEO", "FRAME"])
         .order("created_at"),
       this.supabase
         .from("transcripts")
         .select("*")
+        .eq("tenant_id", tenantId)
+        .eq("creative_asset_id", assetId)
+        .maybeSingle(),
+      this.supabase
+        .from("deconstructions")
+        .select("*")
+        .eq("tenant_id", tenantId)
         .eq("creative_asset_id", assetId)
         .maybeSingle(),
     ]);
@@ -91,9 +138,12 @@ export class AnalysisWorkerRepository {
       throw repositoryError("load analysis artifacts", artifacts.error);
     if (transcript.error)
       throw repositoryError("load transcript", transcript.error);
+    if (deconstruction.error)
+      throw repositoryError("load deconstruction", deconstruction.error);
     return {
       artifacts: artifacts.data ?? [],
       asset: asset.data,
+      deconstruction: deconstruction.data,
       transcript: transcript.data,
     };
   }
@@ -102,7 +152,7 @@ export class AnalysisWorkerRepository {
     assetId: string;
     fingerprint: string;
     idempotencyKey: string;
-    kind: "TRANSCRIPTION" | "CREATIVE_DNA";
+    kind: "TRANSCRIPTION" | "CREATIVE_DNA" | "SKELETON";
     model: string;
     promptVersion: string | null;
     provider: string;
@@ -146,18 +196,49 @@ export class AnalysisWorkerRepository {
     runId: string,
     dna: CreativeDNA,
     invocation: ProviderInvocation<unknown>,
+  ): Promise<string> {
+    const { data, error } = await this.supabase.rpc(
+      "complete_creative_dna_run",
+      {
+        creative_dna: dna as unknown as Json,
+        requested_cost_microusd: invocation.costMicrousd as number,
+        requested_job_id: jobId,
+        requested_latency_ms: invocation.latencyMs,
+        requested_run_id: runId,
+        requested_summary:
+          dna.assessment.why_it_may_work[0] ??
+          "Creative DNA analysis completed.",
+        requested_usage_metadata: withRequestId(invocation),
+      },
+    );
+    if (error || !data) throw repositoryError("complete Creative DNA", error);
+    return data;
+  }
+
+  async completeSkeleton(
+    jobId: string,
+    runId: string,
+    deconstructionId: string,
+    extraction: SkeletonExtraction,
+    invocation: ProviderInvocation<unknown>,
   ): Promise<void> {
-    const { error } = await this.supabase.rpc("complete_creative_dna_run", {
-      creative_dna: dna as unknown as Json,
+    const restrictedElements = extraction.restricted_elements.map(
+      (element) => ({
+        ...element,
+        normalized_value: normalizeRestrictedValue(element.value),
+      }),
+    );
+    const { error } = await this.supabase.rpc("complete_skeleton_run", {
       requested_cost_microusd: invocation.costMicrousd as number,
+      requested_deconstruction_id: deconstructionId,
       requested_job_id: jobId,
       requested_latency_ms: invocation.latencyMs,
       requested_run_id: runId,
-      requested_summary:
-        dna.assessment.why_it_may_work[0] ?? "Creative DNA analysis completed.",
       requested_usage_metadata: withRequestId(invocation),
+      restricted_elements: restrictedElements,
+      skeleton_payload: extraction.skeleton as unknown as Json,
     });
-    if (error) throw repositoryError("complete Creative DNA", error);
+    if (error) throw repositoryError("complete Skeleton", error);
   }
 
   async fail(
@@ -179,6 +260,7 @@ export type AnalysisWorkerStore = Pick<
   AnalysisWorkerRepository,
   | "claim"
   | "completeCreativeDNA"
+  | "completeSkeleton"
   | "completeTranscript"
   | "fail"
   | "getInputs"

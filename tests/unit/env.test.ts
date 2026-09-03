@@ -13,6 +13,7 @@ describe("parseServerEnvironment", () => {
       NODE_ENV: "development",
       RAW_MEDIA_RETENTION_DAYS: 30,
       SCORE_MODEL_ANALYSIS: "gpt-5.6-luna",
+      SCORE_MODEL_SKELETON: "gpt-5.6-luna",
       SCORE_MODEL_TRANSCRIPTION: "gpt-transcribe",
       SCORE_PROVIDER_MODE: "mock",
       SCORE_MOCK_STORAGE_DIR: ".score-data/mock-storage",

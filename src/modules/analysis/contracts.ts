@@ -73,3 +73,38 @@ export type CreativeDNA = {
     reveal: string | null;
   };
 };
+
+export type Skeleton = {
+  avoid_copying: string[];
+  beats: Array<{
+    constraints: string[];
+    function: string;
+    order: number;
+    role: string;
+  }>;
+  canonical_text: string;
+  name: string;
+  one_sentence_structure: string;
+  persuasion_mechanisms: string[];
+  schema_version: "1.0";
+  transfer_rules: string[];
+};
+
+export type RestrictedElement = {
+  element_type:
+    | "PHRASE"
+    | "UNIQUE_FACT"
+    | "METAPHOR"
+    | "SCENE"
+    | "CLAIM"
+    | "NAME"
+    | "OTHER";
+  severity: number;
+  value: string;
+};
+
+export type SkeletonExtraction = {
+  restricted_elements: RestrictedElement[];
+  schema_version: "1.0";
+  skeleton: Skeleton;
+};

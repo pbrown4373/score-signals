@@ -105,6 +105,16 @@ test("valid media processes while invalid and oversized input are rejected", asy
   await expect(
     page.getByText("No performance metrics were supplied.", { exact: true }),
   ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Skeleton" })).toBeVisible();
+  await expect(
+    page.getByText(
+      "The Skeleton preserves the persuasive architecture while removing source-specific language and details.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Problem-led demonstration with evidence", { exact: true }),
+  ).toBeVisible();
 
   const statusResponse = await page.request.get(
     page.url().replace("/app/library/", "/api/creative/"),
@@ -134,4 +144,24 @@ test("valid media processes while invalid and oversized input are rejected", asy
       schema_version: "1.0",
     },
   });
+
+  const skeletonResponse = await page.request.get(
+    `/api/creative/${creativeId}/skeleton`,
+  );
+  expect(skeletonResponse.ok()).toBe(true);
+  const skeletonBody = await skeletonResponse.json();
+  expect(skeletonBody).toMatchObject({
+    lineage: {
+      model: "mock-skeleton-v1",
+      prompt_version: "skeleton.v1",
+      provider: "mock",
+      schema_version: "1.0",
+    },
+    payload: {
+      name: "Problem-led demonstration with evidence",
+      schema_version: "1.0",
+    },
+  });
+  expect(JSON.stringify(skeletonBody)).not.toContain("Mara Vale");
+  expect(JSON.stringify(skeletonBody)).not.toContain("moonlight reset");
 });

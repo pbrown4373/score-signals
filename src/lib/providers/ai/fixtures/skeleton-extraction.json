@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "skeleton": {
+    "schema_version": "1.0",
+    "name": "Problem-led demonstration with evidence",
+    "one_sentence_structure": "Introduce a recognizable problem, challenge the audience's current approach, demonstrate a simpler alternative, support it with an evidence function, and invite a low-friction next step.",
+    "beats": [
+      {
+        "order": 1,
+        "role": "problem recognition",
+        "function": "Make the audience recognize a familiar friction point.",
+        "constraints": [
+          "Use a category-relevant problem without copying the source scenario."
+        ]
+      },
+      {
+        "order": 2,
+        "role": "assumption challenge",
+        "function": "Create curiosity by questioning the current approach.",
+        "constraints": ["Invent original wording and a brand-relevant setup."]
+      },
+      {
+        "order": 3,
+        "role": "solution demonstration",
+        "function": "Show how an alternative changes the process or outcome.",
+        "constraints": ["Use a new setting, action, and visual sequence."]
+      },
+      {
+        "order": 4,
+        "role": "evidence function",
+        "function": "Reduce doubt with substantiated product or customer evidence.",
+        "constraints": ["Use only proof supplied by the adopting brand."]
+      },
+      {
+        "order": 5,
+        "role": "next step",
+        "function": "Offer a clear, low-friction action.",
+        "constraints": [
+          "Match the adopting brand's actual offer and objective."
+        ]
+      }
+    ],
+    "persuasion_mechanisms": [
+      "problem recognition",
+      "curiosity through assumption challenge",
+      "demonstration",
+      "evidence-backed objection reduction"
+    ],
+    "transfer_rules": [
+      "Replace the source problem with a genuine problem faced by the selected persona.",
+      "Use an original demonstration designed around the selected product.",
+      "Substitute only substantiated Brand Brain proof.",
+      "Create new language, characters, facts, metaphors, settings, and scenes."
+    ],
+    "avoid_copying": [
+      "source names and identity details",
+      "source-specific claims and numerical facts",
+      "distinctive phrases or catchphrases",
+      "unique metaphors, events, settings, and scene choreography"
+    ],
+    "canonical_text": "Problem recognition -> assumption challenge -> original product demonstration -> substantiated evidence function -> low-friction next step. Transfer by replacing every source-specific identity, claim, phrase, fact, metaphor, event, setting, and scene with original brand-grounded material."
+  },
+  "restricted_elements": [
+    { "element_type": "NAME", "value": "Mara Vale", "severity": 5 },
+    { "element_type": "PHRASE", "value": "moonlight reset", "severity": 5 },
+    {
+      "element_type": "UNIQUE_FACT",
+      "value": "47-day lighthouse challenge",
+      "severity": 5
+    },
+    {
+      "element_type": "METAPHOR",
+      "value": "charging your body like a solar lantern",
+      "severity": 4
+    },
+    {
+      "element_type": "SCENE",
+      "value": "a red umbrella opens inside a freezer",
+      "severity": 4
+    }
+  ]
+}

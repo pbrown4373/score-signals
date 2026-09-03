@@ -72,6 +72,10 @@ FFmpeg 7.1 is the development baseline. CI asserts that the hosted runner suppli
 | `openai` |   7.9.0 | Live transcription and strict Responses Structured Output |
 | `ajv`    |  8.20.0 | Draft 2020-12 validation at persistence boundaries        |
 
+### Milestone 5 Skeleton boundary
+
+Milestone 5 adds no runtime dependency. It reuses the Model Gateway, OpenAI SDK, Ajv validation, durable Postgres ledger, and mock-provider infrastructure introduced in Milestone 4.
+
 ## Proposed file and module structure
 
 ```text
@@ -155,6 +159,7 @@ Initial live choices are OpenAI, OpenAI transcription, Cloudflare R2, Trigger.de
 - Upload and job idempotency keys are unique per tenant. Worker completion upserts deterministic artifact keys and advances a successful Milestone 3 creative to `TRANSCRIBING` for Milestone 4.
 - Generation runs, transcripts, and deconstructions use composite tenant foreign keys, member-readable RLS, and service-only mutation. Every AI artifact stores provider, model, prompt/schema version, input fingerprint, usage, cost, latency, attempt, and error lineage.
 - Canonical JSON Schemas are compiled with Ajv at the application persistence boundary. OpenAI receives a derived strict schema projection; persisted output must still validate against the canonical repository schema.
+- Skeletons and restricted source elements persist in separate tenant-owned tables. Members may read the abstract Skeleton; restricted values have no authenticated grant or RLS policy and remain service-only for future Originality evaluation.
 - RLS integration tests run against a disposable local Supabase/Postgres 17 instance and prove cross-tenant read and write denial plus viewer read-only behavior.
 - Vector columns are deferred until the embedding milestone; the configured model dimension and SQL type must match before migration.
 - Generated TypeScript database types are checked in and regenerated deterministically after schema changes.
@@ -165,6 +170,7 @@ Initial live choices are OpenAI, OpenAI transcription, Cloudflare R2, Trigger.de
 - Service-only transactional functions claim, finish, fail, and requeue jobs. State transitions are replay-safe and observable; retries reuse the same job and never duplicate domain records.
 - Mock mode dispatches deterministically inline after the durable job is created. This exercises real FFmpeg with no paid credentials while preserving the same state machine.
 - Media completion enqueues one `CREATIVE_ANALYSIS` job that durably chains transcription and Creative DNA. A failed Creative DNA attempt reuses its validated transcript; completed RPCs are replay-safe and preserve original lineage.
+- The same analysis job continues through Skeleton extraction. Resume-stage inference reuses completed transcript and Creative DNA artifacts, and only atomic Skeleton completion marks the creative `READY`.
 - Live mode leaves the job queued for a separately deployed worker. Trigger.dev remains the planned initial scheduler/runner, but its SDK is deferred until the live worker is deployed.
 - Long-running AI, composition, originality, export, and deletion work follows the same ledger-first pattern in later milestones.
 
@@ -172,7 +178,7 @@ Initial live choices are OpenAI, OpenAI transcription, Cloudflare R2, Trigger.de
 
 - Vitest unit tests cover configuration, adapters, domain functions, state machines, and guardrails.
 - Integration tests cover repositories, migrations/RLS, route contracts, idempotency, and schema validation.
-- Playwright covers the self-service critical path in mock-provider mode, including signup, tenant bootstrap, Brand Brain onboarding, private media upload, invalid/oversize rejection, Creative DNA rendering, observed/inferred labels, lineage, logout, and login against local Supabase.
+- Playwright covers the self-service critical path in mock-provider mode, including signup, tenant bootstrap, Brand Brain onboarding, private media upload, invalid/oversize rejection, Creative DNA and Skeleton rendering, lineage, restricted-value absence, logout, and login against local Supabase.
 - Fixtures are synthetic or original, deterministic, versioned, and safe to commit.
 - `npm run verify` runs formatting check, lint, typecheck, unit/integration tests, production build, and the Chromium smoke e2e suite.
 - CI uses no paid credentials and uploads Playwright diagnostics only on failure.
@@ -188,7 +194,7 @@ Initial live choices are OpenAI, OpenAI transcription, Cloudflare R2, Trigger.de
 
 ## Milestone sequence
 
-Execute Milestones 0 through 11 exactly as ordered in `docs/BUILD_PLAN.md`, one reviewed Codex task at a time. Post-MVP Milestones 12 through 17 remain deferred. Milestone 4 is complete; Milestone 5 must not begin until Milestone 4 is reviewed.
+Execute Milestones 0 through 11 exactly as ordered in `docs/BUILD_PLAN.md`, one reviewed Codex task at a time. Post-MVP Milestones 12 through 17 remain deferred. Milestone 5 is complete; Milestone 6 must not begin until Milestone 5 is reviewed.
 
 ## Key risks
 
@@ -220,6 +226,10 @@ Execute Milestones 0 through 11 exactly as ordered in `docs/BUILD_PLAN.md`, one 
 - Preserve the canonical Creative DNA schema and derive an OpenAI-compatible strict projection in the adapter boundary.
 - Default live routing to configurable `gpt-transcribe` and `gpt-5.6-luna`; use deterministic mock adapters in local development and CI.
 - Keep raw transcript text in a private tenant-scoped table and exclude it from status, deconstruction, and UI responses.
+- Treat Skeleton as the sole source-derived input permitted across the future composition boundary. Store exact restricted values separately with service-only access and omit them from Skeleton API/UI responses.
+- Generate Skeleton and restricted elements together, validate each against a versioned schema, and deterministically reject exact normalized leakage anywhere in the Skeleton.
+- Keep `avoid_copying` abstract; exact forbidden wording belongs only in restricted-element storage.
+- Advance a creative to `READY` only after its Skeleton is atomically persisted; retry from the latest completed analysis artifact.
 - Permit URL intake only through an explicit adapter allowlist after protocol, hostname, and every resolved address pass SSRF checks. With no approved MVP adapter configured, return an upload fallback.
 - Restore `.env.example`, which is listed in `MANIFEST.json` and included in the build-pack ZIP but absent from the initial commit.
 - Treat `MANIFEST.json` as provenance for the original build-pack contents, not as a generated inventory of the evolving application.
@@ -231,5 +241,6 @@ Execute Milestones 0 through 11 exactly as ordered in `docs/BUILD_PLAN.md`, one 
 - The production media-worker image and Trigger.dev worker deployment remain open deployment work. The image must pin FFmpeg/FFprobe and consume the existing durable ledger before live media intake is enabled.
 - Embedding model and dimensions remain open until Milestone 12.
 - Live-provider cost calculation currently records provider-reported usage and a nullable cost field; deployment pricing configuration must be selected before paid traffic is enabled.
+- Close paraphrase safety remains broader than Milestone 5's exact normalized boundary check; configured fuzzy and semantic checks belong to Milestone 7.
 - Cross-customer pattern aggregation, anonymization, and ownership remain blocked from implementation until an explicit post-MVP privacy policy exists.
 - Subscription past-due grace behavior needs a billing policy before Milestone 10.
