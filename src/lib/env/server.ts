@@ -8,6 +8,28 @@ const serverEnvironmentSchema = z.object({
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
     .default("info"),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
+  MAX_UPLOAD_MB: z.coerce.number().int().positive().max(5000).default(250),
+  MAX_VIDEO_DURATION_SECONDS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(86_400)
+    .default(600),
+  RAW_MEDIA_RETENTION_DAYS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(365)
+    .default(30),
+  FFMPEG_PATH: z.string().min(1).default("ffmpeg"),
+  FFPROBE_PATH: z.string().min(1).default("ffprobe"),
+  SCORE_MOCK_STORAGE_DIR: z.string().min(1).default(".score-data/mock-storage"),
+  S3_ENDPOINT: z.url().optional(),
+  S3_REGION: z.string().min(1).default("auto"),
+  S3_BUCKET: z.string().min(1).optional(),
+  S3_ACCESS_KEY_ID: z.string().min(1).optional(),
+  S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
 });
 
 export type ServerEnvironment = z.infer<typeof serverEnvironmentSchema>;

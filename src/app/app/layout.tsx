@@ -6,12 +6,12 @@ import { requireTenantContext } from "@/modules/tenancy/context";
 export const dynamic = "force-dynamic";
 
 const navigation = [
-  { label: "Command Center", available: true },
-  { label: "Analyze", available: false },
-  { label: "Library", available: false },
-  { label: "Concepts", available: false },
-  { label: "Brand Brain", available: false },
-  { label: "Account", available: false },
+  { label: "Command Center", href: "/app" },
+  { label: "Analyze", href: "/app/analyze" },
+  { label: "Library", href: "/app/library" },
+  { label: "Concepts" },
+  { label: "Brand Brain", href: "/app/brand-brain" },
+  { label: "Account" },
 ];
 
 export default async function AppLayout({
@@ -35,10 +35,10 @@ export default async function AppLayout({
           <ul className="space-y-1">
             {navigation.map((item) => (
               <li key={item.label}>
-                {item.available ? (
+                {item.href ? (
                   <Link
-                    className="block rounded-lg bg-[var(--background)] px-3 py-2 font-medium"
-                    href="/app"
+                    className="block rounded-lg px-3 py-2 font-medium hover:bg-[var(--background)]"
+                    href={item.href}
                   >
                     {item.label}
                   </Link>

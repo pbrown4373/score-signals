@@ -8,7 +8,10 @@ const localSupabasePublishableKey =
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  fullyParallel: true,
+  // Local Supabase Auth intentionally throttles signup requests; critical-path
+  // tests run serially so CI exercises product behavior instead of rate limits.
+  fullyParallel: false,
+  workers: 1,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
@@ -29,6 +32,7 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       SCORE_PROVIDER_MODE: "mock",
+      MAX_UPLOAD_MB: "1",
       NEXT_TELEMETRY_DISABLED: "1",
       NEXT_PUBLIC_APP_URL: baseURL,
       NEXT_PUBLIC_SUPABASE_URL:
@@ -36,6 +40,7 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
         process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
         localSupabasePublishableKey,
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
     },
   },
 });

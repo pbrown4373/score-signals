@@ -19,13 +19,19 @@ export type TenantContext = {
 };
 
 export async function requireTenantContext(): Promise<TenantContext> {
+  const context = await getTenantContext();
+  if (!context) redirect("/login");
+  return context;
+}
+
+export async function getTenantContext(): Promise<TenantContext | null> {
   const supabase = await createClient();
   const { data: claimsData, error: claimsError } =
     await supabase.auth.getClaims();
   const userId = claimsData?.claims?.sub;
 
   if (claimsError || !userId) {
-    redirect("/login");
+    return null;
   }
 
   let membership = await findFirstMembership(supabase, userId);

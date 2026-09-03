@@ -34,6 +34,546 @@ export type Database = {
   };
   public: {
     Tables: {
+      background_jobs: {
+        Row: {
+          attempt: number;
+          available_at: string;
+          completed_at: string | null;
+          created_at: string;
+          error_code: string | null;
+          error_message: string | null;
+          id: string;
+          idempotency_key: string;
+          kind: string;
+          max_attempts: number;
+          payload: Json;
+          started_at: string | null;
+          status: Database["public"]["Enums"]["background_job_status"];
+          tenant_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          attempt?: number;
+          available_at?: string;
+          completed_at?: string | null;
+          created_at?: string;
+          error_code?: string | null;
+          error_message?: string | null;
+          id?: string;
+          idempotency_key: string;
+          kind: string;
+          max_attempts?: number;
+          payload: Json;
+          started_at?: string | null;
+          status?: Database["public"]["Enums"]["background_job_status"];
+          tenant_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          attempt?: number;
+          available_at?: string;
+          completed_at?: string | null;
+          created_at?: string;
+          error_code?: string | null;
+          error_message?: string | null;
+          id?: string;
+          idempotency_key?: string;
+          kind?: string;
+          max_attempts?: number;
+          payload?: Json;
+          started_at?: string | null;
+          status?: Database["public"]["Enums"]["background_job_status"];
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "background_jobs_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      brand_proof_points: {
+        Row: {
+          brand_id: string;
+          created_at: string;
+          detail: string;
+          id: string;
+          label: string;
+          source_note: string | null;
+          tenant_id: string;
+        };
+        Insert: {
+          brand_id: string;
+          created_at?: string;
+          detail: string;
+          id?: string;
+          label: string;
+          source_note?: string | null;
+          tenant_id: string;
+        };
+        Update: {
+          brand_id?: string;
+          created_at?: string;
+          detail?: string;
+          id?: string;
+          label?: string;
+          source_note?: string | null;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "brand_proof_points_tenant_id_brand_id_fkey";
+            columns: ["tenant_id", "brand_id"];
+            isOneToOne: false;
+            referencedRelation: "brands";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "brand_proof_points_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      brand_restrictions: {
+        Row: {
+          brand_id: string;
+          created_at: string;
+          id: string;
+          notes: string | null;
+          restriction_type: string;
+          tenant_id: string;
+          value: string;
+        };
+        Insert: {
+          brand_id: string;
+          created_at?: string;
+          id?: string;
+          notes?: string | null;
+          restriction_type: string;
+          tenant_id: string;
+          value: string;
+        };
+        Update: {
+          brand_id?: string;
+          created_at?: string;
+          id?: string;
+          notes?: string | null;
+          restriction_type?: string;
+          tenant_id?: string;
+          value?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "brand_restrictions_tenant_id_brand_id_fkey";
+            columns: ["tenant_id", "brand_id"];
+            isOneToOne: false;
+            referencedRelation: "brands";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "brand_restrictions_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      brands: {
+        Row: {
+          brand_voice: Json;
+          category: string | null;
+          created_at: string;
+          description: string | null;
+          id: string;
+          name: string;
+          status: string;
+          tenant_id: string;
+          updated_at: string;
+          website_url: string | null;
+        };
+        Insert: {
+          brand_voice?: Json;
+          category?: string | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name: string;
+          status?: string;
+          tenant_id: string;
+          updated_at?: string;
+          website_url?: string | null;
+        };
+        Update: {
+          brand_voice?: Json;
+          category?: string | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name?: string;
+          status?: string;
+          tenant_id?: string;
+          updated_at?: string;
+          website_url?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "brands_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      creative_assets: {
+        Row: {
+          content_sha256: string | null;
+          created_at: string;
+          created_by: string | null;
+          duration_ms: number | null;
+          error_code: string | null;
+          error_message: string | null;
+          height: number | null;
+          id: string;
+          media_type: string;
+          mime_type: string | null;
+          source_id: string | null;
+          status: Database["public"]["Enums"]["creative_status"];
+          tenant_id: string;
+          title: string | null;
+          updated_at: string;
+          width: number | null;
+        };
+        Insert: {
+          content_sha256?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          duration_ms?: number | null;
+          error_code?: string | null;
+          error_message?: string | null;
+          height?: number | null;
+          id?: string;
+          media_type?: string;
+          mime_type?: string | null;
+          source_id?: string | null;
+          status?: Database["public"]["Enums"]["creative_status"];
+          tenant_id: string;
+          title?: string | null;
+          updated_at?: string;
+          width?: number | null;
+        };
+        Update: {
+          content_sha256?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          duration_ms?: number | null;
+          error_code?: string | null;
+          error_message?: string | null;
+          height?: number | null;
+          id?: string;
+          media_type?: string;
+          mime_type?: string | null;
+          source_id?: string | null;
+          status?: Database["public"]["Enums"]["creative_status"];
+          tenant_id?: string;
+          title?: string | null;
+          updated_at?: string;
+          width?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "creative_assets_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "creative_assets_tenant_id_source_id_fkey";
+            columns: ["tenant_id", "source_id"];
+            isOneToOne: false;
+            referencedRelation: "sources";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      media_artifacts: {
+        Row: {
+          byte_size: number | null;
+          created_at: string;
+          creative_asset_id: string;
+          expires_at: string | null;
+          id: string;
+          kind: Database["public"]["Enums"]["artifact_kind"];
+          metadata: Json;
+          mime_type: string | null;
+          storage_key: string;
+          tenant_id: string;
+        };
+        Insert: {
+          byte_size?: number | null;
+          created_at?: string;
+          creative_asset_id: string;
+          expires_at?: string | null;
+          id?: string;
+          kind: Database["public"]["Enums"]["artifact_kind"];
+          metadata?: Json;
+          mime_type?: string | null;
+          storage_key: string;
+          tenant_id: string;
+        };
+        Update: {
+          byte_size?: number | null;
+          created_at?: string;
+          creative_asset_id?: string;
+          expires_at?: string | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["artifact_kind"];
+          metadata?: Json;
+          mime_type?: string | null;
+          storage_key?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "media_artifacts_tenant_id_creative_asset_id_fkey";
+            columns: ["tenant_id", "creative_asset_id"];
+            isOneToOne: false;
+            referencedRelation: "creative_assets";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "media_artifacts_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      media_uploads: {
+        Row: {
+          created_at: string;
+          creative_asset_id: string;
+          declared_byte_size: number;
+          declared_mime_type: string;
+          expires_at: string;
+          id: string;
+          initiation_key: string;
+          original_filename: string;
+          rejection_code: string | null;
+          status: Database["public"]["Enums"]["media_upload_status"];
+          storage_key: string;
+          tenant_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          creative_asset_id: string;
+          declared_byte_size: number;
+          declared_mime_type: string;
+          expires_at?: string;
+          id?: string;
+          initiation_key: string;
+          original_filename: string;
+          rejection_code?: string | null;
+          status?: Database["public"]["Enums"]["media_upload_status"];
+          storage_key: string;
+          tenant_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          creative_asset_id?: string;
+          declared_byte_size?: number;
+          declared_mime_type?: string;
+          expires_at?: string;
+          id?: string;
+          initiation_key?: string;
+          original_filename?: string;
+          rejection_code?: string | null;
+          status?: Database["public"]["Enums"]["media_upload_status"];
+          storage_key?: string;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "media_uploads_tenant_id_creative_asset_id_fkey";
+            columns: ["tenant_id", "creative_asset_id"];
+            isOneToOne: true;
+            referencedRelation: "creative_assets";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "media_uploads_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      personas: {
+        Row: {
+          attributes: Json;
+          awareness_stage: string | null;
+          brand_id: string;
+          created_at: string;
+          description: string | null;
+          desires: Json;
+          id: string;
+          name: string;
+          objections: Json;
+          pains: Json;
+          tenant_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          attributes?: Json;
+          awareness_stage?: string | null;
+          brand_id: string;
+          created_at?: string;
+          description?: string | null;
+          desires?: Json;
+          id?: string;
+          name: string;
+          objections?: Json;
+          pains?: Json;
+          tenant_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          attributes?: Json;
+          awareness_stage?: string | null;
+          brand_id?: string;
+          created_at?: string;
+          description?: string | null;
+          desires?: Json;
+          id?: string;
+          name?: string;
+          objections?: Json;
+          pains?: Json;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "personas_tenant_id_brand_id_fkey";
+            columns: ["tenant_id", "brand_id"];
+            isOneToOne: false;
+            referencedRelation: "brands";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "personas_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      products: {
+        Row: {
+          brand_id: string;
+          created_at: string;
+          description: string | null;
+          id: string;
+          name: string;
+          offer_details: Json;
+          price_description: string | null;
+          status: string;
+          tenant_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          brand_id: string;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name: string;
+          offer_details?: Json;
+          price_description?: string | null;
+          status?: string;
+          tenant_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          brand_id?: string;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name?: string;
+          offer_details?: Json;
+          price_description?: string | null;
+          status?: string;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "products_tenant_id_brand_id_fkey";
+            columns: ["tenant_id", "brand_id"];
+            isOneToOne: false;
+            referencedRelation: "brands";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "products_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      sources: {
+        Row: {
+          created_at: string;
+          id: string;
+          platform_external_id: string | null;
+          provenance: Json;
+          source_type: Database["public"]["Enums"]["source_type"];
+          source_url: string | null;
+          tenant_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          platform_external_id?: string | null;
+          provenance?: Json;
+          source_type: Database["public"]["Enums"]["source_type"];
+          source_url?: string | null;
+          tenant_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          platform_external_id?: string | null;
+          provenance?: Json;
+          source_type?: Database["public"]["Enums"]["source_type"];
+          source_url?: string | null;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "sources_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       tenant_memberships: {
         Row: {
           created_at: string;
@@ -65,6 +605,7 @@ export type Database = {
       };
       tenants: {
         Row: {
+          brand_brain_completed_at: string | null;
           created_at: string;
           id: string;
           name: string;
@@ -72,6 +613,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          brand_brain_completed_at?: string | null;
           created_at?: string;
           id?: string;
           name: string;
@@ -79,6 +621,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          brand_brain_completed_at?: string | null;
           created_at?: string;
           id?: string;
           name?: string;
@@ -113,10 +656,98 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      bootstrap_brand_brain: { Args: { input: Json }; Returns: string };
       bootstrap_tenant: { Args: { requested_name: string }; Returns: string };
+      claim_media_job: {
+        Args: { requested_job_id: string };
+        Returns: {
+          attempt: number;
+          creative_asset_id: string;
+          tenant_id: string;
+        }[];
+      };
+      complete_creative_upload: {
+        Args: {
+          raw_retention_days: number;
+          requested_asset_id: string;
+          verified_byte_size: number;
+          verified_mime_type: string;
+          verified_sha256: string;
+        };
+        Returns: string;
+      };
+      fail_media_job: {
+        Args: {
+          requested_error_code: string;
+          requested_error_message: string;
+          requested_job_id: string;
+        };
+        Returns: undefined;
+      };
+      finish_media_job: {
+        Args: {
+          derived_artifacts: Json;
+          media_metadata: Json;
+          requested_job_id: string;
+        };
+        Returns: undefined;
+      };
+      initialize_creative_upload: {
+        Args: {
+          requested_byte_size: number;
+          requested_filename: string;
+          requested_initiation_key: string;
+          requested_mime_type: string;
+          requested_title: string;
+        };
+        Returns: {
+          creative_asset_id: string;
+          storage_key: string;
+        }[];
+      };
+      reject_creative_upload: {
+        Args: {
+          requested_asset_id: string;
+          requested_error_code: string;
+          requested_error_message: string;
+        };
+        Returns: undefined;
+      };
+      retry_creative_processing: {
+        Args: { requested_asset_id: string };
+        Returns: string;
+      };
     };
     Enums: {
+      artifact_kind:
+        | "ORIGINAL"
+        | "AUDIO"
+        | "THUMBNAIL"
+        | "FRAME"
+        | "TRANSCRIPT_FILE"
+        | "NORMALIZED_VIDEO";
+      background_job_status:
+        "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
+      creative_status:
+        | "PENDING"
+        | "INGESTING"
+        | "TRANSCRIBING"
+        | "EXTRACTING_FRAMES"
+        | "ANALYZING"
+        | "SKELETONIZING"
+        | "READY"
+        | "FAILED"
+        | "CANCELLED";
+      media_upload_status: "INITIATED" | "VALIDATED" | "REJECTED";
       membership_role: "OWNER" | "ADMIN" | "MEMBER" | "VIEWER";
+      source_type:
+        | "UPLOAD"
+        | "URL"
+        | "YOUTUBE"
+        | "META_AUTHORIZED"
+        | "TIKTOK_AUTHORIZED"
+        | "LICENSED_DATASET"
+        | "OTHER";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -247,7 +878,43 @@ export const Constants = {
   },
   public: {
     Enums: {
+      artifact_kind: [
+        "ORIGINAL",
+        "AUDIO",
+        "THUMBNAIL",
+        "FRAME",
+        "TRANSCRIPT_FILE",
+        "NORMALIZED_VIDEO",
+      ],
+      background_job_status: [
+        "QUEUED",
+        "RUNNING",
+        "SUCCEEDED",
+        "FAILED",
+        "CANCELLED",
+      ],
+      creative_status: [
+        "PENDING",
+        "INGESTING",
+        "TRANSCRIBING",
+        "EXTRACTING_FRAMES",
+        "ANALYZING",
+        "SKELETONIZING",
+        "READY",
+        "FAILED",
+        "CANCELLED",
+      ],
+      media_upload_status: ["INITIATED", "VALIDATED", "REJECTED"],
       membership_role: ["OWNER", "ADMIN", "MEMBER", "VIEWER"],
+      source_type: [
+        "UPLOAD",
+        "URL",
+        "YOUTUBE",
+        "META_AUTHORIZED",
+        "TIKTOK_AUTHORIZED",
+        "LICENSED_DATASET",
+        "OTHER",
+      ],
     },
   },
 } as const;
